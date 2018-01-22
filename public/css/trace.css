@@ -1,0 +1,134 @@
+body{
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-size: 11px;
+}
+.header, .content{
+    padding: 10px;
+    width: 100%;
+    float: left;
+}
+.header{
+    position: fixed;
+    z-index: 99999;
+    background: white;
+    box-shadow: 0 2px 4px 2px;
+}
+.content{
+    margin-top: 50px;
+}
+.w25{
+    width: 25%;
+}
+.w50{
+    width: 50%;
+}
+.w100{
+    width: 100%;
+}
+.mat10{
+    margin-top: 10px;
+}
+.item{
+    width: 100%;
+    float: left;
+    margin: 10px 0 0 0;
+    background: white;
+    border: 1px solid #888;
+    padding: 10px 0;
+    border-width: 0 0 0 5px;
+}
+label{
+    margin-bottom: 0px;
+    margin-top: 10px;
+}
+.item .row div{
+    text-overflow: clip;
+    word-wrap: break-word;
+}
+.item:hover{
+    box-shadow: 0px 2px 8px 2px rgba(0,0,0,0.2);
+}
+.eid_holder{
+    min-height: 45px;
+    position: relative;
+    overflow: scroll;
+    opacity: 0.6;
+}
+.eid_chart{
+    width: 1000000px;
+    background: white;
+}
+.eid_holder:hover{
+    max-height: none;
+}
+.item:hover .eid_holder{
+    opacity: 1;
+}
+.eid_{
+    padding: 2px 6px;
+    background: #eee;
+    margin-bottom:3px;
+    font-size: 11px;
+    color: #eeeeee;
+}
+.eid_req{
+    background: #a03fa0;
+}
+.eid_tsk{
+    background: #446244;
+}
+.item .tohide{
+    display: none;
+}
+.item.nohide .tohide{
+    display: block;
+}
+.stack_{
+    margin: 10px 0;
+    background: #eee;
+    padding: 10px;
+    font-size: 12px;
+    max-height: 520px;
+    overflow: auto;
+}
+
+.status_pending{
+    border-color: burlywood;
+}
+.status_processing{
+    border-color: deepskyblue;
+}
+.status_completed{
+    border-color: green;
+}
+.status_succeed{
+    border-color: white;
+}
+.status_reopen{
+    border-color: gray;
+}
+.status_failed{
+    border-color: brown;
+}
+.btngroup{
+    margin: 10px 0 0 0 ;
+}
+.actpre{
+    width: 100%;
+    border: none;
+    font-size: 11px;
+    padding: 2px 2px 2px 8px;
+    box-shadow: none;
+    border: 1px solid #c2e7fc;
+    border-width: 0 0 0 1px;
+    margin-top: 5px;
+    border-radius: 0px;
+    color: #626262;
+}
+textarea.actpre{
+    height: 60px;
+}
+.btngroup>button.btn{
+    font-size: 10px;
+    padding: 4px;
+}
