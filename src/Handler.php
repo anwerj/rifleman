@@ -13,7 +13,7 @@ class Handler
 
     public function handle(\Throwable $e)
     {
-        return [
+         return [
             $this->getHtml($e),
             400
         ];

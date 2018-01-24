@@ -28,6 +28,16 @@ class BaseController
     protected $args = [];
 
     /**
+     * @var int default response code
+     */
+    protected $responseStatus = 200;
+
+    /**
+     * @var array default response headers
+     */
+    protected $responseHeaders = [];
+
+    /**
      * BaseController constructor.
      * @param $request
      */
@@ -36,21 +46,52 @@ class BaseController
         $this->request = $request;
 
         $this->view = new View([]);
+
+        $this->init();
     }
 
-    public function withArgs()
+    protected function init()
     {
-        $this->args = func_get_args();
+
     }
 
-    public function call($method)
+    public function withArgs($arguments): self
     {
-        if (method_exists($this, $method) === false)
+        $this->args = $arguments;
+
+        return $this;
+    }
+
+    public function call($action)
+    {
+        $callable = $action . $this->request->getMethod();
+
+        if (method_exists($this, $callable) === false)
         {
-            throw new \Exception('Invalid method call : '. $method);
+            throw new \Exception('Invalid action call : '. $callable);
         }
 
-        return $this->$method($this->args);
+        return [$this->$callable($this->args), $this->responseStatus, $this->responseHeaders];
+    }
+
+    protected function input(string $key = null)
+    {
+        $all = $this->request->request->all();
+        if ($key === null)
+        {
+            return $all;
+        }
+        return array_get($all, $key);
+    }
+
+    protected function arg(string $key = null)
+    {
+        if ($key === null)
+        {
+            return $this->args;
+        }
+
+        return array_get($this->args, $key);
     }
 
     protected function view($view, $data = [])
@@ -59,5 +100,12 @@ class BaseController
             'v' => $this->view
         ], $data);
         return $this->view->make($this->viewPath . '/' . $view, $data);
+    }
+
+    protected function toJson($mixed)
+    {
+        $this->responseHeaders['Content-Type'] = 'application/json';
+
+        return json_encode($mixed);
     }
 }

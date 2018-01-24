@@ -2,6 +2,7 @@
 
 namespace Rifle;
 
+use Rifle\Controllers\BaseController;
 use Symfony\Component\HttpFoundation;
 
 class Server
@@ -30,40 +31,30 @@ class Server
 
     public function serve()
     {
-        $method = $this->request->getMethod();
-
-        $action = 'serve'.$method;
-
         try
         {
-            $content = $this->$action();
+            list($content, $this->status, $this->headers) = $this->serveRequest();
         }
-        catch (\Throwable $e)
+        catch (\Exception $e)
         {
             list($content, $this->status) = $this->handler->handle($e);
         }
 
+        //\Log::info('_LOGGER_',[$this->status]);
         return HttpFoundation\Response::create($content, $this->status, $this->headers)->send();
     }
 
-    protected function serveGet()
+    protected function serveRequest()
     {
         $api = $this->request->get('api', 'page');
-        $act = $this->request->get('act', 'index');
+        $act = $this->request->get('action', 'index');
 
-        switch ($api)
-        {
-            case '';
-            case 'page':
-                return $this->controller('page')
-                            ->call($act);
-
-            default:
-                $this->handler->throwEx('Invalid API : '. $api);
-        }
+        return $this->controller($api)
+                    ->withArgs($this->request->query->all())
+                    ->call($act);
     }
 
-    protected function controller($name)
+    protected function controller($name): BaseController
     {
         $className = "\Rifle\Controllers\\" . ucfirst($name) . 'Controller';
 

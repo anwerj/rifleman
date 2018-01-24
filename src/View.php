@@ -25,10 +25,20 @@ class View
         return $this->blade->make($view, $data);
     }
 
-    public function route($api, $action = 'index', $data = [])
+    public function render(string $view, array $data)
+    {
+        return $this->blade->render($view, $data);
+    }
+
+    public static function route($api, $action = 'index', $data = [])
     {
         $query = http_build_query($data);
 
-        return "/?api=$api&act=$action&$query";
+        return "/?api=$api&action=$action&$query";
+    }
+
+    public static function boot($options = [])
+    {
+        return new self($options);
     }
 }

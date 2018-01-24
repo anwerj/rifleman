@@ -6,10 +6,13 @@
 
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/css/bootstrap-grid.css">
+    <link rel="stylesheet" type="text/css" href="/css/app.css">
 
     <script src="/js/jquery.3.2.1.js" type="text/javascript"></script>
     <script src="/js/popper.min.js" type="text/javascript"></script>
     <script src="/js/bootstrap.js" type="text/javascript"></script>
+    <script src="/js/ejs.js" type="text/javascript"></script>
+    <script src="/js/app.js" type="text/javascript"></script>
     @yield('head')
 </head>
 <body>
@@ -58,5 +61,7 @@
     @yield('content')
 </div>
 @yield('footer')
+
+@yield('js')
 </body>
 </html>
