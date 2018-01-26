@@ -106,9 +106,23 @@ class Db
         return $current;
     }
 
+    public function fetch(array $filter, int $limit = null)
+    {
+        $items = $this->connection->select($this->table, '*', $filter);
+
+        if (empty($items) === true)
+        {
+            //$this->throwError();
+        }
+
+        return (new DbRow($this->table))->setRows($items);
+    }
+
     public function secret(& $entry)
     {
-        $entry['secret'] = password_hash($entry['id'], PASSWORD_BCRYPT);
+        $validity = ceil(time()/84600);
+
+        $entry['secret'] = password_hash($entry['id'].$validity, PASSWORD_BCRYPT);
 
         $refresh = filter_var(array_get($entry, 'refresh_secret'), FILTER_VALIDATE_BOOLEAN);
         unset($entry['refresh_secret']);
@@ -169,14 +183,22 @@ class DbRow
         return $this;
     }
 
-    public function toArray()
+    public function toArray(bool $nested = true)
     {
         $array = [];
-        if ($this->isCollection === true)
+        if ($this->isCollection === true )
         {
             foreach ($this->rows as $row)
             {
-                $array[] = $row->toArray();
+                if ($nested === true)
+                {
+                    $array[] = $row->toArray();
+                }
+                else
+                {
+                    $array[] = $row;
+                }
+
             }
         }
         else

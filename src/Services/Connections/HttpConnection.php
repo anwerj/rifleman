@@ -27,11 +27,11 @@ class HttpConnection extends \Rifle\Services\Connection
             {
                 $response = $this->response('check');
 
-                $status = $response->getStatusCode() === 200;
+                $response = $this->validateCheckStatus($response);
 
-                $this->saveStatus($status);
+                $this->saveStatus($response);
 
-                return $status;
+                return $this->getStatus();
             };
     }
 
@@ -60,6 +60,10 @@ class HttpConnection extends \Rifle\Services\Connection
             ],
             'form_params' => [
                 'data'   => $data
+            ],
+            'headers' => [
+                'X-R-ID'     => $this->getId(),
+                'X-R-SECRET' => $this->getSecret(),
             ]
         ];
 
@@ -80,5 +84,15 @@ class HttpConnection extends \Rifle\Services\Connection
         }
 
         return $response;
+    }
+
+    protected function validateCheckStatus($response)
+    {
+        $json = $response->getBody()->getContents();
+
+        $content = json_decode($json, true);
+
+        \Log::info('Http response body '.$this->getId(),[$content]);
+        return $content;
     }
 }

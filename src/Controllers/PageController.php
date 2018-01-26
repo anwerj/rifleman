@@ -16,13 +16,14 @@ class PageController extends BaseController
 
         if ($sessionId === null)
         {
-            $session = Session::generate($this->arg('session_count', 2));
+            $data = Session::generate($this->arg('session_count', 2));
         }
         else
         {
-            $session = Session::retrieve($sessionId);
+            $data = Session::retrieve($sessionId);
         }
 
-        return $this->view('index', ['session' => $session]);
+        \Log::info('_LOGGER_',[$data]);
+        return $this->view('index', $data);
     }
 }

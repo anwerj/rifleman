@@ -97,7 +97,7 @@ class BaseController
     protected function view($view, $data = [])
     {
         $data = array_merge([
-            'v' => $this->view
+            'pre' => ['v' => $this->view]
         ], $data);
         return $this->view->make($this->viewPath . '/' . $view, $data);
     }

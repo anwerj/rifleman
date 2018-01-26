@@ -92,8 +92,9 @@ abstract class Connection
         $this->setStatus($this->dbRow->status);
     }
 
-    public function saveStatus($status)
+    public function saveStatus($response)
     {
+        $status = $response['success'] ?? false;
         if ($status === true)
         {
             $toUpdate = [
@@ -105,6 +106,7 @@ abstract class Connection
         {
             $toUpdate = [
                 'status'       => 'disconnected',
+                'error'        => $response['error'] ?? 'invalid response from connection'
             ];
         }
 

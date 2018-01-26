@@ -73,13 +73,17 @@ class Session
         $id = $id ?? sha1(intval(time()/84000));
 
         $data = [
-            'id'          => $id,
+            'session'     => Db::table(Db::SESSION)->upsert(['id' => $id]),
             'connections' => []
         ];
 
         for ($i = 0; $i<$count; $i++)
         {
-            $data['connections'][] = ['id' => sha1($id. $i)];
+            $connection = [
+                'id'            => sha1($i. $id),
+                'session_id'    => $id,
+            ];
+            $data['connections'][] = Db::table(Db::CONNECTION)->upsert($connection);
         }
 
         return $data;
@@ -87,12 +91,12 @@ class Session
 
     public static function retrieve($id)
     {
-        $session = Db::table(Db::SESSION)->getByPrimaryKey($id);
+        $data = [
+            'session'       => Db::table(Db::SESSION)->getByPrimaryKey($id, true),
+            'connections'   => Db::table(Db::CONNECTION)->fetch(['session_id' => $id])->toArray(false)
+        ];
 
-        if (empty($session))
-        {
-            throw new \Exception("Invalid id for session : $id");
-        }
+        return $data;
     }
 
 }

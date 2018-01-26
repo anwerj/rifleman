@@ -5,6 +5,9 @@ var core = {
     // Used to hold custom handles
     handles : {},
 
+    // Handle to be called on-ajax calls
+    onAjax : {},
+
     // Submits a form with ajax and called handler on that
     submit : function (event, target, handler)
     {
@@ -12,6 +15,8 @@ var core = {
         var form   = $(target);
         var url    = form.attr('action');
         var method = form.attr('method');
+
+        this.handleOnAjax(handler);
 
         $.ajax({
             url     : url,
@@ -49,6 +54,15 @@ var core = {
 
         // Check for Default handler
         // Else throw error
+    },
+
+    // Handle to be called on ajax
+    handleOnAjax : function (handler)
+    {
+        if(core.onAjax[handler])
+        {
+            core.onAjax[handler]();
+        }
     },
 
     // Returns compiled template for id

@@ -2,6 +2,7 @@
 
 namespace Rifle;
 
+use Rifle\Services\Log;
 use Rifle\Controllers\BaseController;
 use Symfony\Component\HttpFoundation;
 
@@ -27,6 +28,8 @@ class Server
         $this->request = HttpFoundation\Request::createFromGlobals();
 
         $this->handler = new Handler($this->request);
+
+        class_alias(Log::class, 'Log');
     }
 
     public function serve()
@@ -40,7 +43,6 @@ class Server
             list($content, $this->status) = $this->handler->handle($e);
         }
 
-        //\Log::info('_LOGGER_',[$this->status]);
         return HttpFoundation\Response::create($content, $this->status, $this->headers)->send();
     }
 
