@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-    <div class="container-fluid mt-5">
+    <div class="container mt-5">
         <form action="{{$pre['v']->route('session', 'connect')}}" method="post" class="alert alert-secondary" onsubmit="core.submit(event, this, 'connector')">
             <h3>Add Connections</h3>
             <small>sha1: {{$session->id}}</small>
@@ -28,7 +28,7 @@
         </form>
     </div>
 
-    <div class="container-fluid mt-5">
+    <div class="container mt-5">
         <pre>
 
         </pre>
@@ -55,7 +55,7 @@ $connection = [
 
 <script id="template_action_sessions" type="text/template">
     {% if(status === 'connected'){ %}
-    <a class="btn btn-success col-3" href="{{ $pre['v']->route('session', 'list')}}&session_id={%=id %}">Continue</a>
+    <a class="btn btn-success col-3" href="{{ $pre['v']->route('page', 'list')}}&session_id={%=id %}">Continue</a>
     {% } else { %}
     <button class="btn btn-info col-3">Check</button>
     {% } %}

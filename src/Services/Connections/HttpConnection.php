@@ -37,7 +37,17 @@ class HttpConnection extends \Rifle\Services\Connection
 
     public function list(string $path): callable
     {
+        return
+            function() use ($path): array
+            {
+                $response = $this->response('list', 'GET', ['path' => $path]);
 
+                $response = $this->validateCheckStatus($response);
+
+                $this->saveStatus($response);
+
+                return $response;
+            };
     }
 
     public function file(string $path): callable

@@ -3,6 +3,7 @@
 namespace Rifle\Services;
 
 use Rifle\Db;
+use Rifle\DbRow;
 use Rifle\Services\Connections;
 
 abstract class Connection
@@ -60,13 +61,20 @@ abstract class Connection
      * Connection constructor.
      * @param array $options
      */
-    public function __construct(array $options)
+    public function __construct($options)
     {
         $this->log = new Log();
 
-        $this->initialize($options);
-
-        $this->save($options, true);
+        if ($options instanceof DbRow)
+        {
+            $this->dbRow = $options;
+        }
+        else
+        {
+            $this->initialize($options);
+            $this->save($options, true);
+        }
+        $this->setFromRow();
     }
 
     public function save(array $options, $upsert = false)
@@ -82,7 +90,10 @@ abstract class Connection
             $this->dbRow = DB::table(Db::CONNECTION)
                              ->update($this->dbRow, $options);
         }
+    }
 
+    public function setFromRow()
+    {
         $this->setId($this->dbRow->id);
         $this->setSecret($this->dbRow->secret);
         $this->setSessionId($this->dbRow->session_id);
@@ -111,6 +122,17 @@ abstract class Connection
         }
 
         $this->save($toUpdate);
+    }
+
+    public static function load(DbRow $connection)
+    {
+        switch ($connection->type)
+        {
+            case self::HTTP:
+                $connection = new Connections\HttpConnection($connection);
+        }
+
+        return $connection;
     }
 
     public static function boot($options)
@@ -234,6 +256,14 @@ abstract class Connection
     public function setStatus($status)
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isConnected()
+    {
+        return $this->getStatus() === 'connected';
     }
 
     /**

@@ -23,7 +23,15 @@ class PageController extends BaseController
             $data = Session::retrieve($sessionId);
         }
 
-        \Log::info('_LOGGER_',[$data]);
         return $this->view('index', $data);
+    }
+
+    public function listGet()
+    {
+        $sessionId = $this->arg('session_id');
+
+        $data = Session::retrieve($sessionId);
+
+        return $this->view('list', $data);
     }
 }

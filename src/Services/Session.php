@@ -17,6 +17,18 @@ class Session
      */
     public $connections = [];
 
+    public function load(DbRow $session, $connections = [])
+    {
+        $this->session = $session;
+
+        foreach ($connections as $id => $connection)
+        {
+            $this->connections[$connection->id] = Connection::load($connection);
+        }
+
+        return $this;
+    }
+
     public function boot(array $session, array $connections): self
     {
         $this->session = Db::table(Db::SESSION)->secret($session)
@@ -30,6 +42,25 @@ class Session
         }
 
         return $this;
+    }
+
+    public function list($path)
+    {
+        $content = [
+            'connections' => [],
+        ];
+        $sessionStatus = true;
+
+        foreach ($this->connections as $id => $connection)
+        {
+            $connectionList = $connection->list($path)();
+            $content['connections'][$id] = $connectionList['content'] ?? [];
+            $sessionStatus = ($sessionStatus and $connection->isConnected());
+        }
+
+        $content['session'] = $this->handleSessionStatus($sessionStatus);
+
+        return $content;
     }
 
     public function check()
@@ -47,7 +78,14 @@ class Session
             $sessionStatus = ($sessionStatus and $connectionStatus);
         }
 
-        if ($sessionStatus === true)
+        $content['session'] = $this->handleSessionStatus($sessionStatus);
+
+        return $content;
+    }
+
+    protected function handleSessionStatus($status)
+    {
+        if ($status === true)
         {
             $toUpdate = [
                 'status'       => 'connected',
@@ -62,10 +100,8 @@ class Session
         }
         $toUpdate['updated_at'] = Db::timestamp();
 
-        $content['session'] = Db::table(Db::SESSION)->update($this->session, $toUpdate)
-                                                    ->toArray();
-
-        return $content;
+        return Db::table(Db::SESSION)->update($this->session, $toUpdate)
+            ->toArray();
     }
 
     public static function generate(int $count = 2, string $id = null)

@@ -57,7 +57,7 @@
 
 @show
 
-<div class="container">
+<div class="w100">
     @yield('content')
 </div>
 @yield('footer')

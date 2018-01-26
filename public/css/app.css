@@ -19,3 +19,25 @@ pre.file{
     border-radius: 4px;
     background: #050505;
 }
+.connection{
+    background: #eee;
+    padding: 0px;
+    border-right: 1px solid #0e6837;
+}
+.connection>.top{
+    background: #106836;
+    color: white;
+    padding: 0.6rem 0 0.6rem 1.6rem;
+}
+.list_actions{
+    width: 100%;
+    padding: 0.6rem 0 0.6rem 0.6rem;
+    margin: 0px;
+    background: #f5f5dc;
+    border-bottom: 1px solid #0e6837;
+}
+.list_content{
+    min-height: 600px;
+    overflow: scroll;
+}
+

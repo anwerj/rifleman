@@ -28,4 +28,15 @@ class SessionController extends BaseController
 
         return $this->toJson($response);
     }
+
+    public function listGet()
+    {
+        $data = $this->session->retrieve($this->arg('session_id'));
+
+        $response = $this->session
+                         ->load($data['session'], $data['connections'])
+                         ->list($this->arg('path'));
+
+        return $this->toJson($response);
+    }
 }
