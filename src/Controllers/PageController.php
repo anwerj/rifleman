@@ -16,7 +16,7 @@ class PageController extends BaseController
 
         if ($sessionId === null)
         {
-            $session = Session::generate(2);
+            $session = Session::generate($this->arg('session_count', 2));
         }
         else
         {

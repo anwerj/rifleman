@@ -3,6 +3,140 @@
 namespace Rifle;
 
 use Medoo\Medoo;
+use Rifle\Services\Log;
+
+class Db
+{
+    const SESSION    = 'session';
+    const CONNECTION = 'connection';
+
+    static $persist;
+
+    protected $connection;
+
+    private $table;
+
+    private $ignoreOnUpdate = [];
+
+    private function __construct()
+    {
+        $this->connection = new Medoo([
+            'database_type' => 'sqlite',
+            'database_file' => __DIR__ . '/../resources/database/sqlite.db'
+        ]);
+    }
+
+    private function setTable(string $table)
+    {
+        $this->table = $table;
+    }
+
+    public static function table($table): self
+    {
+        if (self::$persist === null)
+        {
+            self::$persist = new self();
+        }
+        self::$persist->setTable($table);
+
+        return self::$persist;
+    }
+
+    public static function timestamp($time = null)
+    {
+        return time();
+    }
+
+    public function insert($data)
+    {
+        if ($this->hasColumn('created_at'))
+        {
+            $data['created_at'] = Db::timestamp();
+        }
+        Log::debug("Inserting $this->table", $data);
+        $this->connection->insert($this->table, $data);
+        $id = $this->connection->id();
+        if(empty($id) === false)
+        {
+            return $data[$this->getPrimaryKey()];
+        }
+        $this->throwError();
+    }
+
+    public function getByPrimaryKey($primaryKey, $strict = false)
+    {
+        $item = $this->connection->get($this->table, '*', [$this->getPrimaryKey() => $primaryKey]);
+        if (empty($item) === false)
+        {
+            return (new DbRow($this->table))->setAttributes($item);
+        }
+        if ($strict === true)
+        {
+            $this->throwError("$this->table doesn't have pk : $primaryKey");
+        }
+    }
+
+    public function update(DbRow $row, array $replace)
+    {
+        $primaryKey = $this->getPrimaryKey();
+
+        Log::debug("Updating $this->table ". $row->{$primaryKey}, [$replace]);
+        $updated = $this->connection->update($this->table, $replace, [$primaryKey => $row->{$primaryKey}]);
+
+        if (empty($updated) === false)
+        {
+            return $row->setAttributes($replace);
+        }
+        $this->throwError();
+    }
+
+    public function upsert(array $entry): DbRow
+    {
+        $current = $this->getByPrimaryKey($entry[$this->getPrimaryKey()]);
+        if (empty($current) === true)
+        {
+            $id = $this->insert($entry);
+            $current = $this->getByPrimaryKey($id, true);
+        }
+        else
+        {
+            $current = $this->update($current, array_except($entry, $this->ignoreOnUpdate));
+            $this->ignoreOnUpdate = [];
+        }
+        return $current;
+    }
+
+    public function secret(& $entry)
+    {
+        $entry['secret'] = password_hash($entry['id'], PASSWORD_BCRYPT);
+
+        $refresh = filter_var(array_get($entry, 'refresh_secret'), FILTER_VALIDATE_BOOLEAN);
+        unset($entry['refresh_secret']);
+        if (empty($refresh))
+        {
+            $this->ignoreOnUpdate[] = 'secret';
+        }
+
+        return $this;
+    }
+
+    public function getPrimaryKey()
+    {
+        return 'id';
+    }
+
+    public function hasColumn($column)
+    {
+        return true;
+    }
+
+    public function throwError($message = null)
+    {
+        $message = $message ?? implode(':', $this->connection->error());
+
+        throw new DbException($message);
+    }
+}
 
 class DbException extends \Exception
 {}
@@ -21,7 +155,7 @@ class DbRow
 
     public function setAttributes(array $attributes): self
     {
-        $this->attributes = $attributes;
+        $this->attributes = array_merge($this->attributes, $attributes);
         return $this;
     }
 
@@ -64,79 +198,5 @@ class DbRow
             return $this->attributes[$key];
         }
         throw new DbException("$key is not present in $this->table");
-    }
-}
-
-class Db
-{
-    const SESSION    = 'session';
-    const CONNECTION = 'connection';
-
-    static $persist;
-
-    protected $connection;
-
-    private $table;
-
-    private function __construct()
-    {
-        $this->connection = new Medoo([
-            'database_type' => 'sqlite',
-            'database_file' => __DIR__ . '/../resources/database/sqlite.db'
-        ]);
-    }
-
-    private function setTable(string $table)
-    {
-        $this->table = $table;
-    }
-
-    public static function table($table): self
-    {
-        if (self::$persist === null)
-        {
-            self::$persist = new self();
-        }
-        self::$persist->setTable($table);
-
-        return self::$persist;
-    }
-
-    public function insert($data)
-    {
-        $this->connection->insert($this->table, $data);
-        $id = $this->connection->id();
-        if(empty($id) === false)
-        {
-            return $id;
-        }
-        $this->throwError();
-    }
-
-    public function getById($id)
-    {
-        $item = $this->connection->get($this->table, '*', ['id' => $id]);
-        if (empty($item) === false)
-        {
-            return (new DbRow($this->table))->setAttributes($item);
-        }
-    }
-
-    public function getOrCreate(array $entry)
-    {
-        $current = $this->getById($entry['id']);
-        if (empty($current))
-        {
-            $id = $this->insert($entry);
-            $current = $this->getById($id);
-        }
-        return $current;
-    }
-
-    public function throwError($message = null)
-    {
-        $message = $message ?? implode(':', $this->connection->error());
-
-        throw new DbException($message);
     }
 }

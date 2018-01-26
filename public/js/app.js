@@ -12,18 +12,16 @@ var core = {
         var form   = $(target);
         var url    = form.attr('action');
         var method = form.attr('method');
-        console.log(url, method);
+
         $.ajax({
             url     : url,
             method  : method,
             data    : form.serialize()
         }).done(function (response)
         {
-            console.log('success', response);
             return core.response(handler, response);
         }).fail(function (xhr)
         {
-            console.log('failure', xhr);
             return core.response(handler, null, xhr);
         });
 
@@ -36,31 +34,19 @@ var core = {
         if (data === null)
         {
             //handleFailure();
-
             return;
         }
-        if ('boolean' === typeof data.success)
-        {
-            data = [data];
-        }
-
-        var dataHandler;
-        for(var i in data)
-        {
-            dataHandler = handler ? handler : (data.handler ? data.handler : 'handler');
-            core.handle(handler, data[i], i);
-        }
+        this.handle(handler, data)
     },
 
     // Handles the data for ID
-    handle : function (handler, data, id)
+    handle : function (handler, data)
     {
-        var compiler = core.ejs(handler);
-
         if(core.handles[handler])
         {
-            core.handles[handler](compiler(data), data, id);
+            core.handles[handler](data);
         }
+
         // Check for Default handler
         // Else throw error
     },

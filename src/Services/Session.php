@@ -3,14 +3,14 @@
 namespace Rifle\Services;
 
 use Rifle\Db;
+use Rifle\DbRow;
 use Rifle\View;
 
 class Session
 {
     /**
-     * @var array
+     * @var DbRow
      */
-
     public $session;
     /**
      * @var array
@@ -19,15 +19,13 @@ class Session
 
     public function boot(array $session, array $connections): self
     {
-        $session['secret'] = $this->generateSecret($session['id']);
-
-        $this->session = Db::table(Db::SESSION)->getOrCreate($session);
+        $this->session = Db::table(Db::SESSION)->secret($session)
+                                               ->upsert($session);
 
         foreach ($connections as $id => $connection)
         {
             $connection['id']         = $id;
             $connection['session_id'] = $this->session->id;
-            $connection['secret']     = $this->generateSecret($id);
             $this->connections[$id]   = Connection::boot($connection);
         }
 
@@ -36,35 +34,38 @@ class Session
 
     public function check()
     {
-        $content = [];
-        $view = [
-            'session' => $this->session
+        $content = [
+            'connections' => [],
         ];
+
+        $sessionStatus = true;
+
         foreach ($this->connections as $id => $connection)
         {
-            if ($connection->check()())
-            {
-                $content[$id] = ['success' => true, 'id' => $id];
-            }
-            else
-            {
-                $view['connection'] = $connection;
-                $content[$id] = [
-                    'success'    => false,
-                    'id'         => $id,
-                    'action'     => 'add_connector',
-                    'link'       => View::route('session', 'connector'),
-                    'content'    => View::boot()->render('connection.connector', $view)
-                ];
-            }
+            $connectionStatus = $connection->check()();
+            $content['connections'][$id] = $connection->toDbRow()->toArray();
+            $sessionStatus = ($sessionStatus and $connectionStatus);
         }
 
-        return $content;
-    }
+        if ($sessionStatus === true)
+        {
+            $toUpdate = [
+                'status'       => 'connected',
+                'connected_at' => Db::timestamp(),
+            ];
+        }
+        else
+        {
+            $toUpdate = [
+                'status'       => 'disconnected',
+            ];
+        }
+        $toUpdate['updated_at'] = Db::timestamp();
 
-    private function generateSecret($id)
-    {
-        return password_hash($id, PASSWORD_BCRYPT);
+        $content['session'] = Db::table(Db::SESSION)->update($this->session, $toUpdate)
+                                                    ->toArray();
+
+        return $content;
     }
 
     public static function generate(int $count = 2, string $id = null)
@@ -86,7 +87,7 @@ class Session
 
     public static function retrieve($id)
     {
-        $session = Db::table(Db::SESSION)->getById($id);
+        $session = Db::table(Db::SESSION)->getByPrimaryKey($id);
 
         if (empty($session))
         {

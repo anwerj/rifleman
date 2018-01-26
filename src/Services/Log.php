@@ -22,6 +22,11 @@ class Log
         self::logger()->error($key, $data);
     }
 
+    public static function debug(string $key, array $data = [])
+    {
+        self::logger()->debug($key, $data);
+    }
+
     private static function logger()
     {
         if (empty(self::$logger) === true)

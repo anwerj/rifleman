@@ -8,7 +8,6 @@ use Rifle\Services\Connections;
 abstract class Connection
 {
     const HTTP = 'http';
-
     const FILE = 'file';
 
     /**
@@ -41,8 +40,17 @@ abstract class Connection
      */
     protected $status = 'idle';
 
+    /**
+     * @var mixed
+     */
     protected $secret;
 
+    /**
+     * @var
+     */
+    protected $dbRow;
+
+    abstract protected function initialize(& $options);
     abstract function check();
     abstract function list(string $path);
     abstract function file(string $path);
@@ -56,20 +64,51 @@ abstract class Connection
     {
         $this->log = new Log();
 
-        $this->id  = $options['id'];
-
-        $this->sessionId = $options['session_id'];
-
-        $this->secret = $options['secret'];
-
         $this->initialize($options);
 
-        $this->save();
+        $this->save($options, true);
     }
 
-    public function save()
+    public function save(array $options, $upsert = false)
     {
-        return Db::table(DB::CONNECTION)->getOrCreate($this->toArray());
+        if ($upsert === true)
+        {
+            $this->dbRow = Db::table(Db::CONNECTION)
+                             ->secret($options)
+                             ->upsert($options);
+        }
+        else
+        {
+            $this->dbRow = DB::table(Db::CONNECTION)
+                             ->update($this->dbRow, $options);
+        }
+
+        $this->setId($this->dbRow->id);
+        $this->setSecret($this->dbRow->secret);
+        $this->setSessionId($this->dbRow->session_id);
+        $this->setPath($this->dbRow->path);
+        $this->setName($this->dbRow->name);
+        $this->setType($this->dbRow->type);
+        $this->setStatus($this->dbRow->status);
+    }
+
+    public function saveStatus($status)
+    {
+        if ($status === true)
+        {
+            $toUpdate = [
+                'status'       => 'connected',
+                'connected_at' => Db::timestamp(),
+            ];
+        }
+        else
+        {
+            $toUpdate = [
+                'status'       => 'disconnected',
+            ];
+        }
+
+        $this->save($toUpdate);
     }
 
     public static function boot($options)
@@ -81,8 +120,6 @@ abstract class Connection
             case self::HTTP:
                 $connection = new Connections\HttpConnection($options);
         }
-
-        $connection->save();
 
         return $connection;
     }
@@ -112,7 +149,7 @@ abstract class Connection
     /**
      * @param string $path
      */
-    public function setPath(string $path): void
+    public function setPath(string $path)
     {
         $this->path = $path;
     }
@@ -128,7 +165,7 @@ abstract class Connection
     /**
      * @param string $type
      */
-    public function setType(string $type): void
+    public function setType(string $type)
     {
         $this->type = $type;
     }
@@ -144,7 +181,7 @@ abstract class Connection
     /**
      * @param string $name
      */
-    public function setName(string $name): void
+    public function setName(string $name)
     {
         $this->name = $name;
     }
@@ -160,7 +197,7 @@ abstract class Connection
     /**
      * @param mixed $sessionId
      */
-    public function setSessionId($sessionId): void
+    public function setSessionId($sessionId)
     {
         $this->sessionId = $sessionId;
     }
@@ -176,7 +213,7 @@ abstract class Connection
     /**
      * @param mixed $id
      */
-    public function setId($id): void
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -192,7 +229,7 @@ abstract class Connection
     /**
      * @param mixed $status
      */
-    public function setStatus($status): void
+    public function setStatus($status)
     {
         $this->status = $status;
     }
@@ -208,7 +245,7 @@ abstract class Connection
     /**
      * @param mixed $secret
      */
-    public function setSecret($secret): void
+    public function setSecret($secret)
     {
         $this->secret = $secret;
     }
@@ -224,5 +261,10 @@ abstract class Connection
             'path'       => $this->getPath(),
             'status'     => $this->getStatus(),
         ];
+    }
+
+    public function toDbRow()
+    {
+        return $this->dbRow;
     }
 }

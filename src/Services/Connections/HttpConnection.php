@@ -5,16 +5,19 @@ namespace Rifle\Services\Connections;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Rifle\Db;
 
 class HttpConnection extends \Rifle\Services\Connection
 {
     protected $type = self::HTTP;
 
-    protected function initialize($options)
+    protected function initialize(& $options)
     {
-        $this->path = self::validatePath($options);
+        $options['path'] = self::validatePath($options);
 
-        $this->name = self::validateName($options);
+        $options['name'] = self::validateName($options);
+
+        $options['type'] = $this->type;
     }
 
     public function check(): callable
@@ -24,7 +27,11 @@ class HttpConnection extends \Rifle\Services\Connection
             {
                 $response = $this->response('check');
 
-                return $response->getStatusCode() === 200;
+                $status = $response->getStatusCode() === 200;
+
+                $this->saveStatus($status);
+
+                return $status;
             };
     }
 
@@ -69,7 +76,7 @@ class HttpConnection extends \Rifle\Services\Connection
                 $response = new Response($e->getCode(), [], $e->getMessage());
             }
 
-            $this->log->error("Error in action : $action", [$e->getMessage(), $response->getBody()]);
+            $this->log->error("Error in action : $action", [$response->getBody()->getContents()]);
         }
 
         return $response;

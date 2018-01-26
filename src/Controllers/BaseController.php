@@ -74,24 +74,24 @@ class BaseController
         return [$this->$callable($this->args), $this->responseStatus, $this->responseHeaders];
     }
 
-    protected function input(string $key = null)
+    protected function input(string $key = null, $default = null)
     {
         $all = $this->request->request->all();
         if ($key === null)
         {
             return $all;
         }
-        return array_get($all, $key);
+        return array_get($all, $key, $default);
     }
 
-    protected function arg(string $key = null)
+    protected function arg(string $key = null, $default = null)
     {
         if ($key === null)
         {
             return $this->args;
         }
 
-        return array_get($this->args, $key);
+        return array_get($this->args, $key, $default);
     }
 
     protected function view($view, $data = [])
