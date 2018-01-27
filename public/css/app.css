@@ -75,6 +75,10 @@ i.status.disconnected{
 .entry.file .entry_name>span{
     color: #0e6837;
 }
+.entry.missing .entry_name{
+    color: #dddddd;
+    cursor: not-allowed;
+}
 .list_content .prettyprint{
     width: 100%;
     height: 100%;

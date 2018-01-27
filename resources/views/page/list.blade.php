@@ -37,23 +37,29 @@
 @section('js')
 
 <script id="template_list_content" type="text/template">
-    {% for(var i in content){ entry=content[i]; %}
-        <div class="entry {%=entry.is_dir ?'directory':'file' %}"
-             data-basepath="{%=entry.base_path %}"
-             data-connectionid="{%=connectionId %}"
-             title="{%=entry.real_path %}">
-            <div class="entry_name" onclick="core.handles.on_entry_click(this.parentNode)">
-                <span class="" rel="link">{%=entry.name %}</span>
-                <i>{%=entry.base_path %}</i>
-            </div>
+    {% if(entry._missing){ %}
+    <div class="entry missing">
+        <div class="entry_name">
+            <span class="" rel="link">{%=entry.name %}</span>
         </div>
+    </div>
+    {% } else { %}
+    <div class="entry {%=entry.is_dir ?'directory':'file' %}"
+         data-basepath="{%=entry.base_path %}"
+         data-connectionid="{%=entryIndex %}"
+         title="{%=entry.real_path %}">
+        <div class="entry_name" onclick="core.handles.on_entry_click(this.parentNode)">
+            <span class="" rel="link">{%=entry.name %}</span>
+            <i>{%=entry.base_path %}</i>
+        </div>
+    </div>
     {% } %}
 </script>
 
 <script id="template_file_content" type="text/template">
     <pre class="prettyprint" contenteditable="true">{%-content.body.replace(/</g,'&lt;') %}</pre>
 </script>
-
+<script src="/js/rdiff.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function ()
     {
@@ -68,14 +74,7 @@
                 $('#status_'+id).removeClass('connected').addClass('disconnected');
             }
         }
-        var handleList = function (connection, id)
-        {
-            $('#'+id+' .list_content').html(core.ejs('list_content')({
-                content: connection.content,
-                entry: null,
-                connectionId: id,
-            }));
-        }
+
         var handleFile = function (connection, id)
         {
             $('#'+id+' .list_content').html(core.ejs('file_content')({
@@ -91,21 +90,28 @@
         }
         core.handles.list_content = function (data)
         {
-            var id, content, connections = data.connections, session = data.session;
+            var id, content, connections = data.connections, session = data.session, type;
             handleStatus(session, session.id);
             for(id in connections)
             {
                 handleStatus(connections[id], id);
-                content = connections[id]['content'];
-                if (connections[id].type === 'file')
-
+                content = connections[id].content;
+                type = type || connections[id].type;
+                if (type !== connections[id].type)
                 {
-                    handleFile(connections[id], id);
+                    // Handle diff types
                 }
-                else
-                {
-                    handleList(connections[id], id);
-                }
+            }
+            if (type === 'file')
+            {
+                handleFile(connections);
+            }
+            else
+            {
+                rdiff({
+                    preferred : '{{$connections[0]->id}}',
+                    compiler  : core.ejs('list_content')
+                }).handleList(connections);
             }
         }
         core.handles.on_entry_click = function (target)
