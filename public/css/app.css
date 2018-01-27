@@ -31,13 +31,53 @@ pre.file{
 }
 .list_actions{
     width: 100%;
-    padding: 0.6rem 0 0.6rem 0.6rem;
+    padding: 0.6rem 0;
     margin: 0px;
     background: #f5f5dc;
     border-bottom: 1px solid #0e6837;
 }
 .list_content{
-    min-height: 600px;
+    min-height: 100%;
     overflow: scroll;
 }
-
+i.status{
+    display: inline-block;
+    padding: 5px;
+    border-radius: 20px;
+    border: 4px solid white;
+    box-shadow: 0px 0px 1px 1px black;
+    background: #FFFFFF;
+}
+i.status.connected{
+    background: green;
+}
+i.status.disconnected{
+    background: #fc6b00;
+}
+.list_content .entry{
+    padding: 12px 15px;
+    background: white;
+    border-bottom: 1px solid #daeeea;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-size: 0.9rem;
+}
+.entry .entry_name{
+    display: inline-block;
+    cursor: pointer;
+}
+.entry .entry_name>i{
+    font-size: 0.7rem;
+    color: #aaa;
+}
+.entry.directory .entry_name>span{
+    color: #28a745;
+}
+.entry.file .entry_name>span{
+    color: #0e6837;
+}
+.list_content .prettyprint{
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    background: white;
+}

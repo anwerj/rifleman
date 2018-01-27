@@ -36,8 +36,6 @@
 @endsection
 
 @section('js')
-<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
-
 <script id="template_connection" type="text/template">
     {% if(connection.status === 'connected'){ %}
     <div class="alert alert-success">Success</div>

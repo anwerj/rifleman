@@ -54,7 +54,7 @@ class Session
         foreach ($this->connections as $id => $connection)
         {
             $connectionList = $connection->list($path)();
-            $content['connections'][$id] = $connectionList['content'] ?? [];
+            $content['connections'][$id] = $connectionList;
             $sessionStatus = ($sessionStatus and $connection->isConnected());
         }
 

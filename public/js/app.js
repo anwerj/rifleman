@@ -49,11 +49,11 @@ var core = {
     {
         if(core.handles[handler])
         {
-            core.handles[handler](data);
+            return core.handles[handler](data);
         }
-
         // Check for Default handler
         // Else throw error
+        console.log('No handle found for '+handler);
     },
 
     // Handle to be called on ajax

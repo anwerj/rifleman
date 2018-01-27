@@ -32,6 +32,12 @@ class PageController extends BaseController
 
         $data = Session::retrieve($sessionId);
 
+        foreach ($data['connections'] as $index => $connection)
+        {
+            $prefil = $this->arg('connections.'.$connection->id);
+            $data['connections'][$index]->prefill = $prefil;
+        }
+
         return $this->view('list', $data);
     }
 }

@@ -11,6 +11,8 @@ class HttpConnection extends \Rifle\Services\Connection
 {
     protected $type = self::HTTP;
 
+    protected $action;
+
     protected function initialize(& $options)
     {
         $options['path'] = self::validatePath($options);
@@ -25,7 +27,9 @@ class HttpConnection extends \Rifle\Services\Connection
         return
             function(): bool
             {
-                $response = $this->response('check');
+                $this->action = 'check';
+
+                $response = $this->response();
 
                 $response = $this->validateCheckStatus($response);
 
@@ -40,7 +44,9 @@ class HttpConnection extends \Rifle\Services\Connection
         return
             function() use ($path): array
             {
-                $response = $this->response('list', 'GET', ['path' => $path]);
+                $this->action = 'list';
+
+                $response = $this->response(['path' => $path]);
 
                 $response = $this->validateCheckStatus($response);
 
@@ -60,16 +66,16 @@ class HttpConnection extends \Rifle\Services\Connection
 
     }
 
-    protected function response($action, $method = 'GET', $data = [])
+    protected function response($queryData = [], $method = 'GET', $postData = [])
     {
         $client = new Client();
 
+        $queryData['action'] = $this->action;
+
         $options = [
-            'query' => [
-                'action' => $action
-            ],
+            'query' => $queryData,
             'form_params' => [
-                'data'   => $data
+                'data'   => $postData
             ],
             'headers' => [
                 'X-R-ID'     => $this->getId(),
