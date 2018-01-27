@@ -98,6 +98,7 @@
                 handleStatus(connections[id], id);
                 content = connections[id]['content'];
                 if (connections[id].type === 'file')
+
                 {
                     handleFile(connections[id], id);
                 }
