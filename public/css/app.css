@@ -1,13 +1,3 @@
-pre.file{
-    width: 100%;
-    border: 1px solid #bbbbbb;
-    height: 180px;
-    font-size: 12px;
-    font-family: monospace;
-    background: white;
-    padding: 10px;
-
-}
 .response .alert{
     margin: .5rem 0;
     font-size: 0.8rem;
@@ -36,7 +26,7 @@ pre.file{
     background: #f5f5dc;
     border-bottom: 1px solid #0e6837;
 }
-.list_content{
+.parsed_content{
     min-height: 100%;
     overflow: scroll;
 }
@@ -54,7 +44,7 @@ i.status.connected{
 i.status.disconnected{
     background: #fc6b00;
 }
-.list_content .entry{
+.parsed_content .entry{
     padding: 12px 15px;
     background: white;
     border-bottom: 1px solid #daeeea;
@@ -75,9 +65,33 @@ i.status.disconnected{
 .entry.file .entry_name>span{
     color: #0e6837;
 }
-.list_content .prettyprint{
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    background: white;
+.entry.missing .entry_name{
+    color: #dddddd;
+    cursor: not-allowed;
 }
+.parsed_content .file_line{
+    height: auto;
+    background: white;
+    border: 0px;
+    font-size: 12px;
+    font-family: monospace;
+    background: white;
+    line-height: 2px;
+}
+.parsed_content .file_line>div{
+    height: 18px;
+    line-height: 18px;
+    padding: 0 0 0 5px;
+}
+.parsed_content .line_info{
+    width: 5%;
+    float: left;
+}
+.parsed_content .line_info .line_diff{
+    background: #ffeaea;
+}
+.parsed_content .line_detail{
+    width: 94.5%;
+    float: right;
+}
+
