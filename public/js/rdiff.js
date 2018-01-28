@@ -7,9 +7,9 @@ var rdiff = function (options)
         return options.preferred || all[0];
     }
 
-    var getCompiler = function ()
+    var getCompiler = function (type)
     {
-        return options.compiler;
+        return options.compilers[type];
     }
 
     var getTarget = function (items, type)
@@ -18,21 +18,40 @@ var rdiff = function (options)
         // #<id> .<type>_content
         for (var id in items)
         {
-            targets[id] = $('#'+id +' .'+ type+ '_content').html('');
+            targets[id] = $('#'+id +' .parsed_content').html('');
         }
         return targets;
     };
 
-    var getPositionInAll = function (entries, all, index)
-    {
-        var position = {};
-
-        for(var id in all)
-        {
-
-        }
-    }
     return {
+        handleFile : function (files)
+        {
+            var entries = JSON.parse(JSON.stringify(files));
+            var index, ldColumn, liColumn, entry, pref, item, name;
+            var all = Object.keys(entries);
+            var pre = getPreferred(all);
+            var targets = getTarget(entries, 'file');
+            var ldCompiler = getCompiler('ld');
+            var liCompiler = getCompiler('li');
+            var items = {};
+            var maxLines = 0;
+            var entryHtml = '<pre class="line_info file_line"></pre><pre class="line_detail file_line prettyprint"></pre>'
+
+            for(index in entries)
+            {
+                items = entries[index].content.body;
+                maxLines = Math.max(maxLines, items.length);
+                targets[index].html(entryHtml);
+                ldColumn = targets[index].find('.line_detail');
+                liColumn = targets[index].find('.line_info');
+                for(item in items)
+                {
+                    ldColumn.append(ldCompiler({entry:items[item], entryIndex : index, itemIndex:item}));
+                    liColumn.append(liCompiler({entry:items[item], entryIndex : index, itemIndex:item}));
+                }
+            }
+        },
+
         handleList : function (list)
         {
             var entries = JSON.parse(JSON.stringify(list));
@@ -40,8 +59,7 @@ var rdiff = function (options)
             var all = Object.keys(entries);
             var pre = list[getPreferred(all)];
             var targets = getTarget(entries, 'list');
-            console.log(targets);
-            var comiler = getCompiler();
+            var lCompiler = getCompiler('list');
             var items = {};
 
             // m*n ~ n^2
@@ -63,7 +81,7 @@ var rdiff = function (options)
                         entry = {name : name, _missing:true};
                     }
                     // items[entry][index] = item;
-                    targets[index].append(comiler({entry : entry, entryIndex : index, itemIndex : name}))
+                    targets[index].append(lCompiler({entry : entry, entryIndex : index, itemIndex : name}))
                 }
             }
 

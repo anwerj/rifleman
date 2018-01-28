@@ -14,7 +14,7 @@
             <div class=""> <i id="status_{{$connection->id}}" class="status"></i> {{$connection->path}}</div>
             <small class="text-success">sha1: {{$connection->id}}</small>
         </div>
-        <form id="form_list_{{$connection->id}}" action="{{$pre['v']->route('session', 'list')}}" onsubmit="core.submit(event, this, 'list_content')">
+        <form class="m-0" id="form_list_{{$connection->id}}" action="{{$pre['v']->route('session', 'list')}}" onsubmit="core.submit(event, this, 'list_content')">
             <div class="list_actions row">
                     <input type="hidden" name="session_id" value="{{$session->id}}">
                     <div class="col-md-8">
@@ -26,9 +26,7 @@
             </div>
         </form>
 
-        <div class="list_content">
-
-        </div>
+        <div class="parsed_content"></div>
     </div>
 @endforeach
     </div>
@@ -56,9 +54,14 @@
     {% } %}
 </script>
 
-<script id="template_file_content" type="text/template">
-    <pre class="prettyprint" contenteditable="true">{%-content.body.replace(/</g,'&lt;') %}</pre>
+<script id="template_line_detail" type="text/template">
+    <div>{%= entry %}</div>
 </script>
+<script id="template_line_info" type="text/template">
+    <div>{%-itemIndex %}</div>
+</script>
+
+
 <script src="/js/rdiff.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function ()
@@ -104,13 +107,21 @@
             }
             if (type === 'file')
             {
-                handleFile(connections);
+                if (connections.length > 2)
+                {
+                    // Can't generate diff for than two files
+                }
+                rdiff({
+                    preferred : '{{$connections[0]->id}}',
+                    compilers : {ld:core.ejs('line_detail'), li:core.ejs('line_info')}
+                }).handleFile(connections);
+                PR.prettyPrint();
             }
             else
             {
                 rdiff({
                     preferred : '{{$connections[0]->id}}',
-                    compiler  : core.ejs('list_content')
+                    compilers : {list:core.ejs('list_content')}
                 }).handleList(connections);
             }
         }
