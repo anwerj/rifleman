@@ -44,6 +44,21 @@ i.status.connected{
 i.status.disconnected{
     background: #fc6b00;
 }
+.input_path{
+    color: #dddddd;
+    border-color: #bbbbbb;
+    opacity: 0.5;
+}
+.input_path.active{
+    color: #0e6837;
+    border-color: #0e6837;
+    opacity: 1;
+}
+.btn_emoji{
+    border : 1px solid #777;
+    border-radius: 4px;
+}
+
 .parsed_content .entry{
     padding: 12px 15px;
     background: white;
@@ -77,6 +92,7 @@ i.status.disconnected{
     font-family: monospace;
     background: white;
     line-height: 2px;
+    padding: 0 2px;
 }
 .parsed_content .file_line>div{
     height: 18px;

@@ -34,7 +34,7 @@ class PageController extends BaseController
 
         foreach ($data['connections'] as $index => $connection)
         {
-            $prefil = $this->arg('connections.'.$connection->id);
+            $prefil = $this->arg('connections.'.$connection->id, DIRECTORY_SEPARATOR);
             $data['connections'][$index]->prefill = $prefil;
         }
 

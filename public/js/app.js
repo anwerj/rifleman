@@ -1,4 +1,11 @@
-var core = {
+var core =
+{
+    // Init methods, called once app is loaded
+    onInit : {},
+
+    // Direct function calls
+    fn : {},
+
     // Used to hold compiled templates
     templates : {},
 
@@ -8,6 +15,29 @@ var core = {
     // Handle to be called on-ajax calls
     onAjax : {},
 
+    // Custom functions written
+    onCustom : {},
+
+    // Called by app it self after load completes
+    init : function ()
+    {
+        for (var i in core.onInit)
+        {
+            core.onInit[i](core);
+        };
+    },
+
+    // Custom function must have handles
+    // It can gracefully handle unloaded content
+    custom : function (event, target, handler)
+    {
+        if(core.onCustom[handler])
+        {
+            return core.onCustom[handler](event, target);
+        }
+        console.log('No custom function found for '+handler);
+    },
+
     // Submits a form with ajax and called handler on that
     submit : function (event, target, handler)
     {
@@ -16,7 +46,7 @@ var core = {
         var url    = form.attr('action');
         var method = form.attr('method');
 
-        this.handleOnAjax(handler);
+        this.handleOnAjax(event, handler, form);
 
         $.ajax({
             url     : url,
@@ -45,6 +75,7 @@ var core = {
     },
 
     // Handles the data for ID
+    // Handles can we directly called only after page is loaded
     handle : function (handler, data)
     {
         if(core.handles[handler])
@@ -57,11 +88,11 @@ var core = {
     },
 
     // Handle to be called on ajax
-    handleOnAjax : function (handler)
+    handleOnAjax : function (event, handler, target)
     {
         if(core.onAjax[handler])
         {
-            core.onAjax[handler]();
+            core.onAjax[handler](event, target);
         }
     },
 
