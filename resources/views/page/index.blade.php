@@ -20,7 +20,7 @@
                         Refresh Secret
                         <input class="" name="con[{{$connection->id}}][refresh_secret]" type="checkbox">
                     </small>
-                    <div class="response"></div>
+                    <div class="parsed_content"></div>
                 </div>
             @endforeach
 
@@ -40,14 +40,8 @@
     {% if(connection.status === 'connected'){ %}
     <div class="alert alert-success">Success</div>
     {% } else { %}
-    <div class="alert alert-warning">Error in connecting : <code class="">{%=connection.error %}</code></div>
-<pre class="file prettyprint lang-php">
-&lt;?php
-$connection = [
-    'id'     => '{%=connection.id %}',
-    'secret' => '{%=connection.secret %}',
-];
-</pre>
+    <div class="alert alert-warning">Error in connecting : <span class="code">{%=connection.error %}</span></div>
+    <pre class="file file_line prettyprint">$dns = "{%=btoa(connection.id+':'+connection.secret+':'+'..')%}";</pre>
     {% } %}
 </script>
 
@@ -68,15 +62,20 @@ $connection = [
             var id, connections = data.connections, session = data.session;
             for(var i in connections)
             {
-                console.log('#'+connections[i].id+' .response');
-                $('#'+connections[i].id+' .response').html(core.ejs('connection')({connection : connections[i], session: session}));
+                console.log('#'+connections[i].id+' .parsed_content');
+                $('#'+connections[i].id+' .parsed_content').html(core.ejs('connection')({connection : connections[i], session: session}));
             }
             PR.prettyPrint();
             $('#action_sessions').html(core.ejs('action_sessions')(session));
         };
         core.onAjax['connector'] = function ()
         {
-            $('#action_sessions .btn').text('Checking...');
+            return {
+                pre : function ()
+                {
+                    $('#action_sessions .btn').text('Checking...');
+                }
+            }
         }
     })
 </script>

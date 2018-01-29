@@ -14,9 +14,9 @@
             <div class=""> <i id="status_{{$connection->id}}" class="status"></i> {{$connection->path}}</div>
             <small class="text-warning">sha1: {{$connection->id}}</small>
         </div>
-        <div class="list_actions row">
+        <div class="list_actions row" data-spy="affix" data-offset-top="60" data-offset-bottom="200">
             <div class="col-md-7">
-                <form class="m-0" id="form_list_{{$connection->id}}" action="{{$pre['v']->route('session', 'list')}}" onsubmit="core.submit(event, this, 'list_content')">
+                <form class="m-0 form_list" id="form_list_{{$connection->id}}" action="{{$pre['v']->route('session', 'list')}}" onsubmit="core.submit(event, this, 'list_content')">
                     <input type="hidden" name="session_id" value="{{$session->id}}">
                     <input class="form-control input_path" name="path" placeholder="path goes here" value="{{$connection->prefill}}">
                 </form>
@@ -57,12 +57,8 @@
     {% } %}
 </script>
 
-<script id="template_line_detail" type="text/template">
-    <div>{%= entry %}</div>
-</script>
-<script id="template_line_info" type="text/template">
-    <div>{%-itemIndex %}</div>
-</script>
+<script id="template_line_detail" type="text/template">{%= entry %}<br></script>
+<script id="template_line_info" type="text/template">{%-itemIndex %}<br></script>
 
 
 <script src="/js/rdiff.js" type="text/javascript"></script>
@@ -85,15 +81,22 @@
         {
             $('#form_list_'+connection+' .input_path').val(path);
         }
-        $('.input_path').removeClass('active');
-        $('#form_list_'+connection+' .input_path').addClass('active');
         $('#form_list_'+connection).submit();
     }
 
     core.onAjax.list_content = function (event, target)
     {
-        //
-    };
+        var path;
+        return {
+            pre: function ()
+            {
+                console.log(target);
+                $('.form_list').removeClass('active');
+                $(target).addClass('active');
+
+            }
+        }
+    }
 
     core.handles.list_content = function (data)
     {
@@ -154,7 +157,6 @@
                 path = path.slice(0,-2);
                 break
         }
-        console.log(path, path.join('/'));
         core.fn.handleSubmit(connection, path.join('/'));
     }
 

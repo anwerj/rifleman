@@ -46,7 +46,7 @@ var core =
         var url    = form.attr('action');
         var method = form.attr('method');
 
-        this.handleOnAjax(event, handler, form);
+        var postAjax = this.handleOnAjax(event, target, handler);
 
         $.ajax({
             url     : url,
@@ -54,9 +54,11 @@ var core =
             data    : form.serialize()
         }).done(function (response)
         {
+            postAjax(response);
             return core.response(handler, response);
         }).fail(function (xhr)
         {
+            postAjax(xhr, null);
             return core.response(handler, null, xhr);
         });
 
@@ -88,12 +90,24 @@ var core =
     },
 
     // Handle to be called on ajax
-    handleOnAjax : function (event, handler, target)
+    // Check for init, if there calls it
+    // return default post function if not defined
+    handleOnAjax : function (event, target, handler)
     {
         if(core.onAjax[handler])
         {
-            core.onAjax[handler](event, target);
+            var handles = core.onAjax[handler](event, target);
+            if (handles.pre)
+            {
+                handles.pre();
+            }
+            if (handles.post)
+            {
+                return handles.post;
+            }
         }
+        // Default Post Ajax
+        return function () {};
     },
 
     // Returns compiled template for id

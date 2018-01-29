@@ -1,14 +1,3 @@
-.response .alert{
-    margin: .5rem 0;
-    font-size: 0.8rem;
-    padding: .4rem .6rem;
-}
-.response .alert code{
-    color: whitesmoke;
-    padding: 4px 10px;
-    border-radius: 4px;
-    background: #050505;
-}
 .connection{
     background: #eee;
     padding: 0px;
@@ -25,10 +14,19 @@
     margin: 0px;
     background: #f5f5dc;
     border-bottom: 1px solid #0e6837;
+    position: sticky;
 }
-.parsed_content{
-    min-height: 100%;
-    overflow: scroll;
+.parsed_content{}
+.parsed_content .alert{
+    margin: .5rem 0;
+    font-size: 0.8rem;
+    padding: .4rem .6rem;
+}
+.parsed_content .alert .code{
+    color: whitesmoke;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: #050505;
 }
 i.status{
     display: inline-block;
@@ -49,7 +47,7 @@ i.status.disconnected{
     border-color: #bbbbbb;
     opacity: 0.5;
 }
-.input_path.active{
+form.active .input_path{
     color: #0e6837;
     border-color: #0e6837;
     opacity: 1;
@@ -91,7 +89,6 @@ i.status.disconnected{
     font-size: 12px;
     font-family: monospace;
     background: white;
-    line-height: 2px;
     padding: 0 2px;
 }
 .parsed_content .file_line>div{

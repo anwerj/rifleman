@@ -31,8 +31,6 @@ class HttpConnection extends \Rifle\Services\Connection
 
                 $response = $this->response();
 
-                $response = $this->validateCheckStatus($response);
-
                 $this->saveStatus($response);
 
                 return $this->getStatus();
@@ -47,8 +45,6 @@ class HttpConnection extends \Rifle\Services\Connection
                 $this->action = 'list';
 
                 $response = $this->response(['path' => $path]);
-
-                $response = $this->validateCheckStatus($response);
 
                 $this->saveStatus($response);
 
@@ -83,32 +79,23 @@ class HttpConnection extends \Rifle\Services\Connection
             ]
         ];
 
-        $response = new Response(500);
-
         try
         {
             $response = $client->request($method, $this->path, $options);
+            $json = $response->getBody()->getContents();
+            $content = json_decode($json, true);
         }
         catch (\Exception $e)
         {
-            if (method_exists($e, 'getResponse'))
+            $error = get_class($e).':'.$e->getMessage();
+            if ($e->hasResponse())
             {
-                $response = new Response($e->getCode(), [], $e->getMessage());
+                $json = $e->getResponse()->getBody()->getContent();
+                \Log::info('_LOGGER_',[$json]);
             }
-
-            $this->log->error("Error in action : $action", [$response->getBody()->getContents()]);
+            $content = ['success' => false, 'error'=> $error];
         }
 
-        return $response;
-    }
-
-    protected function validateCheckStatus($response)
-    {
-        $json = $response->getBody()->getContents();
-
-        $content = json_decode($json, true);
-
-        \Log::info('Http response body '.$this->getId(),[$content]);
         return $content;
     }
 }
